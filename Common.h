@@ -3,15 +3,22 @@
 #include <QMetaEnum>
 #include <QDebug>
 
-class ChannelParams {
+template<typename QtEnum>
+std::string QtEnumToString(QtEnum value)
+{
+    return QVariant::fromValue(value).toString().toStdString();
+}
+
+class ChannelEnum {
     Q_GADGET
 public:
+    virtual std::string getParamStr(int i) { return "";}
     virtual int getSize() { return -1; }
 };
-Q_DECLARE_METATYPE(ChannelParams)
+Q_DECLARE_METATYPE(ChannelEnum)
 
 
-class ParamsPOX : public ChannelParams
+class ParamsPOX : public ChannelEnum
 {
     Q_GADGET
 public:
@@ -25,17 +32,17 @@ public:
     explicit ParamsPOX() {}
     ParamsPOX(const ParamsPOX& value) {}
     ~ParamsPOX() {}
-
-    int getSize() { return params::sizeOfPOX; }
+    std::string getParamStr(int i)
+    {
+        params param = (params)i;
+        return QtEnumToString(param);
+    }
+    int getSize() { return sizeOfPOX; }
 
 };
 Q_DECLARE_METATYPE(ParamsPOX)
 
-template<typename QtEnum>
-std::string QtEnumToString(QtEnum value)
-{
-    return QVariant::fromValue(value).toString().toStdString();
-}
+
 
 
 #endif // COMMON_H

@@ -22,7 +22,7 @@ void Cortege::initChannels()
 void Cortege::fillCortegeByRow(const QStringList& row)
 {
     timeMark = fillDateFromString(row[0]);
-    QVector<ChannelParams*> channelEnums;
+    QVector<ChannelEnum*> channelEnums;
 
     ParamsPOX* par = new ParamsPOX();
 
@@ -35,23 +35,29 @@ void Cortege::fillCortegeByRow(const QStringList& row)
         fillChannel(channels[i], channelEnums[i], QStringList(first, last));
     }
 
-    //qDebug() << *this;
+    qDebug() << *this;
+
 
 }
 
-void Cortege::fillChannel(Channel& pox, ChannelParams* channelEnum, const QStringList& data)
+void Cortege::fillChannel(Channel& channel, ChannelEnum *channelEnum, const QStringList& data)
 {
-    //qDebug() << data;
     double min, max, n_records, mean;
 
     for(int i = 0; i < channelEnum->getSize(); i++)
     {
-        min         = data[0+i*4].toDouble();
+        min         = data[0+i*4].toDouble(); // 4 - min max, n_rec, mean
         mean        = data[1+i*4].toDouble();
         max         = data[2+i*4].toDouble();
         n_records   = data[3+i*4].toDouble();
+        channel.getParamStat(channelEnum->getParamStr(i)) = ParamStat<double>(min, max, n_records, mean);
+    }
 
-        pox.getParamStat(QtEnumToString((ParamsPOX::params)(i))) = ParamStat<double>(min, max, n_records, mean);
+    QStringList alarms = data.last().split(',');
+
+    for(int i = 0; i < alarms.size(); i++)
+    {
+
     }
 }
 
@@ -82,7 +88,6 @@ QDateTime fillDateFromString(QString timeString)
     QStringList parts = timeString.split(sign);
     QString timePart = parts[0];
     QString timezoneOffset = sign + parts[1];
-    qDebug() << sign;
 
     QTime time = QTime::fromString(timePart, "HH:mm:ss");
 
