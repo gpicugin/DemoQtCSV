@@ -4,13 +4,14 @@
 #include <QStringList>
 #include <QDebug>
 #include "trendslibrary/Channel.h"
+#include "Cortege.h"
 
-QVector<QStringList> lines; // Вектор для хранения данных по столбцам
+void fillCorteges(const QString &fileName, QVector<Cortege>& corteges)
+{
+    QFile file(fileName);
 
-void parseCSV(const QString &filePath) {
-    QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "Не удалось открыть файл:" << filePath;
+        qWarning() << "Не удалось открыть файл:" << fileName;
         return;
     }
 
@@ -18,21 +19,24 @@ void parseCSV(const QString &filePath) {
 
     bool first = true;
 
-    while (!in.atEnd()) {
-        if(first) {
-            in.readLine();
+    while (!in.atEnd())
+    {
+        if(first)
+        {
+            in.readLine(); // пропускаем шапку
             first = false;
         }
-        QString line = in.readLine();
-        QStringList fields = line.split(";"); // Парсим строку на элементы
-        fields.pop_front();
 
-        for(int i = 0; i < fields.size(); i++)
+        QString line = in.readLine();
+        QStringList row = line.split(";");
+
+
+        for(int i = 0; i < row.size(); i++)
         {
-            fields[i] = fields[i].trimmed();
+            row[i] = row[i].trimmed();
         }
 
-        lines.push_back(fields);
+        corteges.push_back(Cortege(row));
     }
 
     file.close();
@@ -40,25 +44,18 @@ void parseCSV(const QString &filePath) {
 
 
 
-void fillChannel(Channel& channel) {
-
-}
-
-
 int main(int argc, char *argv[])
 {
     QCoreApplication a(argc, argv);
+    setlocale(LC_ALL, "");
 
-    QString filePath = "test_1.csv";
-    parseCSV(filePath);
+    //qRegisterMetaType<ParamsPOX>("ParamsPOX");
 
-    qDebug() << lines;
+    QVector<Cortege> corteges;
 
-    std::vector<std::string> params = { "SpO2", "PR", "HR" };
+    QString fileName = "../test_1.csv";
 
-    ChannelDescriptor descriptor("POX", params);
-
-    Channel pox(descriptor);
+    fillCorteges(fileName, corteges);
 
     return a.exec();
 }
