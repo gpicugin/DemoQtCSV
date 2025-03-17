@@ -5,25 +5,25 @@
 #include <QDebug>
 
 enum trendableChannels {
+    T1,
+    T2,
     POX,
     size
 };
-
-enum offsets {
-    poxOffset = 1
-};
-
-
 
 class Cortege
 {
 public:
     Cortege(const QStringList& row);
-    QDateTime timeMark;
-    QVector<Channel> channels;
+private:
     void initChannels();
     void fillCortegeByRow(const QStringList &row);
     void fillChannel(Channel &channel, const QStringList& data);
+public:
+    QDateTime timeMark;
+    QVector<Channel> channels;
+    QMap<int, int> offset;
+
 };
 
 QDebug operator<< (QDebug out, Cortege& cortege);

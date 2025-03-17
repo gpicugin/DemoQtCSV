@@ -10,23 +10,36 @@ Cortege::Cortege(const QStringList& row)
 
 void Cortege::initChannels()
 {
-    std::vector<std::string> params = { "SpO2", "PR"};
+    offset = {{0,1}, {1, 6}, {2, 11}};
+    std::vector<std::string> paramsTemp = { "Temp" };
+    std::vector<std::string> paramsPOX = { "SpO2", "PR"};
 
-    ChannelDescriptor descriptor("POX", params);
 
-    Channel pox(descriptor);
 
+    ChannelDescriptor descriptorT1("T1", paramsTemp);
+    ChannelDescriptor descriptorT2("T2", paramsTemp);
+    ChannelDescriptor descriptorPOX("POX", paramsPOX);
+
+
+    Channel t1(descriptorT1);
+    Channel t2(descriptorT2);
+    Channel pox(descriptorPOX);
+
+    channels.push_back(t1);
+    channels.push_back(t2);
     channels.push_back(pox);
 }
 
 void Cortege::fillCortegeByRow(const QStringList& row)
 {
     timeMark = fillDateFromString(row[0]);
-    QStringList::const_iterator first   = row.begin() + poxOffset;
-    QStringList::const_iterator last    = row.begin() + poxOffset + ParamsPOX::sizeOfPOX * 4 + 1;
+    QStringList::const_iterator first;
+    QStringList::const_iterator last;
 
     for(int i = 0; i < trendableChannels::size; i++)
     {
+        first = row.begin() + offset[i];
+        last  = row.begin() + offset[i] + channels[i].getParamStats().size() * 4 + 1;
         fillChannel(channels[i], QStringList(first, last));
     }
 
@@ -54,6 +67,7 @@ void Cortege::fillChannel(Channel& channel, const QStringList& data)
 
     for(int i = 0; i < alarms.size(); i++)
     {
+        alarms[i] = alarms[i].trimmed();
         alarms[i].remove(QChar('\"'));
         channel.Alarm.setAlarm(alarms[i].toStdString());
     }
