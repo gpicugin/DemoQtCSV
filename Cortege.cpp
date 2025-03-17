@@ -22,17 +22,12 @@ void Cortege::initChannels()
 void Cortege::fillCortegeByRow(const QStringList& row)
 {
     timeMark = fillDateFromString(row[0]);
-    QVector<ChannelEnum*> channelEnums;
-
-    ParamsPOX* par = new ParamsPOX();
-
-    channelEnums.push_back(par);
     QStringList::const_iterator first   = row.begin() + poxOffset;
     QStringList::const_iterator last    = row.begin() + poxOffset + ParamsPOX::sizeOfPOX * 4 + 1;
 
     for(int i = 0; i < trendableChannels::size; i++)
     {
-        fillChannel(channels[i], channelEnums[i], QStringList(first, last));
+        fillChannel(channels[i], QStringList(first, last));
     }
 
     qDebug() << *this;
@@ -40,17 +35,19 @@ void Cortege::fillCortegeByRow(const QStringList& row)
 
 }
 
-void Cortege::fillChannel(Channel& channel, ChannelEnum *channelEnum, const QStringList& data)
+void Cortege::fillChannel(Channel& channel, const QStringList& data)
 {
     double min, max, n_records, mean;
 
-    for(int i = 0; i < channelEnum->getSize(); i++)
+    ChannelDescriptor descriptor = channel.getDescriptor();
+
+    for(int i = 0; i < descriptor.params.size(); i++)
     {
         min         = data[0+i*4].toDouble(); // 4 - min max, n_rec, mean
         mean        = data[1+i*4].toDouble();
         max         = data[2+i*4].toDouble();
         n_records   = data[3+i*4].toDouble();
-        channel.getParamStat(channelEnum->getParamStr(i)) = ParamStat<double>(min, max, n_records, mean);
+        channel.getParamStat(descriptor.params[i]) = ParamStat<double>(min, max, n_records, mean);
     }
 
     QStringList alarms = data.last().split(',');
