@@ -53,3 +53,7 @@ trendslibrary/
 debug/
 
 build/
+
+Sequense.wsd
+
+*.wsd

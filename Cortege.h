@@ -24,7 +24,7 @@ public:
     QVector<Channel> channels;
     void initChannels();
     void fillCortegeByRow(const QStringList &row);
-    void fillChannel(Channel &pox, ChannelEnum *channelEnum, const QStringList& data);
+    void fillChannel(Channel &channel, ChannelEnum *channelEnum, const QStringList& data);
 };
 
 QDebug operator<< (QDebug out, Cortege& cortege);

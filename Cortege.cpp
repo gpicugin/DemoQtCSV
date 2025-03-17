@@ -28,7 +28,7 @@ void Cortege::fillCortegeByRow(const QStringList& row)
 
     channelEnums.push_back(par);
     QStringList::const_iterator first   = row.begin() + poxOffset;
-    QStringList::const_iterator last    = row.begin() + ParamsPOX::sizeOfPOX * 4 + 1;
+    QStringList::const_iterator last    = row.begin() + poxOffset + ParamsPOX::sizeOfPOX * 4 + 1;
 
     for(int i = 0; i < trendableChannels::size; i++)
     {
@@ -57,7 +57,8 @@ void Cortege::fillChannel(Channel& channel, ChannelEnum *channelEnum, const QStr
 
     for(int i = 0; i < alarms.size(); i++)
     {
-
+        alarms[i].remove(QChar('\"'));
+        channel.Alarm.setAlarm(alarms[i].toStdString());
     }
 }
 
@@ -66,6 +67,8 @@ QDebug operator<< (QDebug out, Cortege& cortege)
     out << cortege.timeMark << "\n";
     for(int i = 0; i < cortege.channels.size(); i++)
     {
+        out << QString(cortege.channels[i].getDescriptor().name.c_str()) << "\n";
+
         int size = cortege.channels[i].getParamStats().size();
 
         for(int j = 0; j < size; j++)
@@ -74,7 +77,14 @@ QDebug operator<< (QDebug out, Cortege& cortege)
             out << cortege.channels[i].getParamStats()[j].GetMin() \
             << cortege.channels[i].getParamStats()[j].GetMean() \
             << cortege.channels[i].getParamStats()[j].GetMax() \
-                << cortege.channels[i].getParamStats()[j].GetNumber() << "\n";
+            << cortege.channels[i].getParamStats()[j].GetNumber() << "\n";
+        }
+
+        std::list<Entry<std::string>> alarms = cortege.channels[i].Alarm.getAlarms();
+
+        for(std::list<Entry<std::string>>::iterator it = alarms.begin(); it != alarms.end(); it++)
+        {
+            out << QString(it->alarm.c_str()) << "\n";
         }
 
     }
